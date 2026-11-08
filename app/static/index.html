@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RoomDesk · 会议室预约与分析</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">RD</span>
+    RoomDesk
+    <span class="sub">会议室预约与分析 · PostgreSQL 16 + pgbouncer + FastAPI</span>
+  </div>
+  <div class="topright">
+    <span id="healthDot" class="dot"></span>
+    <span id="healthText" class="mono">连接中…</span>
+    <a class="link" href="/docs" target="_blank">Swagger</a>
+    <a class="link" href="/health" target="_blank">/health</a>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-view="overview">总览</button>
+  <button class="tab" data-view="find">找空房</button>
+  <button class="tab" data-view="book">预约</button>
+  <button class="tab" data-view="report">报表</button>
+  <button class="tab" data-view="ops">事件 / 运维</button>
+</nav>
+
+<main>
+
+  <!-- ============ 总览 ============ -->
+  <section id="view-overview" class="view active">
+    <div class="grid c4">
+      <div class="stat"><div class="k">房间</div><div class="v" id="ov-rooms">–</div><div class="m">含停用的</div></div>
+      <div class="stat"><div class="k">人员</div><div class="v" id="ov-staff">–</div><div class="m">可预约者</div></div>
+      <div class="stat"><div class="k">预约</div><div class="v" id="ov-bookings">–</div><div class="m">含已取消</div></div>
+      <div class="stat"><div class="k">读模型新鲜度</div><div class="v" id="ov-fresh">–</div><div class="m" id="ov-fresh-m">物化视图</div></div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <h2>最近预约</h2>
+      <p class="hint">数据来自 <code class="mono">GET /api/bookings?limit=8</code>；状态由数据库的排他约束与 status 字段共同维护。</p>
+      <div id="ov-recent"></div>
+    </div>
+  </section>
+
+  <!-- ============ 找空房 ============ -->
+  <section id="view-find" class="view">
+    <div class="panel">
+      <h2>查某个时段的可用房间</h2>
+      <p class="hint">
+        后端调用数据库函数 <code class="mono">free_rooms()</code>：
+        用 <code class="mono">tstzrange</code> 的 <code class="mono">&amp;&amp;</code> 判断区间重叠，设备条件用 JSONB 的 <code class="mono">?&amp;</code>。
+      </p>
+      <form class="row" id="find-form">
+        <div class="field"><label>开始</label><input type="datetime-local" id="find-from" required></div>
+        <div class="field"><label>结束</label><input type="datetime-local" id="find-to" required></div>
+        <div class="field"><label>最少容纳</label><input type="number" id="find-cap" value="1" min="1" max="500" style="width:90px"></div>
+        <div class="field"><label>需要的设备</label><div class="chips" id="find-equip"></div></div>
+        <button class="btn" type="submit">查询</button>
+      </form>
+      <div class="toast" id="find-toast"></div>
+    </div>
+    <div class="panel">
+      <h2>可用房间</h2>
+      <div id="find-result" class="empty">还没有查询结果。</div>
+    </div>
+  </section>
+
+  <!-- ============ 预约 ============ -->
+  <section id="view-book" class="view">
+    <div class="panel">
+      <h2>新建预约</h2>
+      <p class="hint">
+        时间用 ISO8601 带时区提交；同一房间时段重叠时，**数据库的 EXCLUDE 约束**会拒绝，接口返回 409。
+      </p>
+      <form class="row" id="book-form">
+        <div class="field"><label>房间</label><select id="book-room" required style="min-width:150px"></select></div>
+        <div class="field"><label>人员</label><select id="book-staff" required style="min-width:150px"></select></div>
+        <div class="field"><label>开始</label><input type="datetime-local" id="book-from" required></div>
+        <div class="field"><label>结束</label><input type="datetime-local" id="book-to" required></div>
+        <div class="field" style="flex:1;min-width:180px"><label>用途</label><input type="text" id="book-purpose" placeholder="例如：技术评审"></div>
+        <div class="field"><label>标签（逗号分隔）</label><input type="text" id="book-tags" placeholder="对外,面试" style="width:150px"></div>
+        <button class="btn" type="submit">提交预约</button>
+      </form>
+      <div class="toast" id="book-toast"></div>
+    </div>
+
+    <div class="panel">
+      <h2>预约列表</h2>
+      <p class="hint">搜索走 trigram 索引（<code class="mono">ILIKE</code>），取消后该时段立刻释放（部分索引条件 <code class="mono">status='confirmed'</code>）。</p>
+      <form class="row" id="list-form" style="margin-bottom:12px">
+        <div class="field" style="flex:1"><label>按用途/标签搜索</label><input type="text" id="list-q" placeholder="留空看全部"></div>
+        <div class="field"><label>状态</label>
+          <select id="list-status"><option value="">全部</option><option value="confirmed">已确认</option><option value="cancelled">已取消</option></select>
+        </div>
+        <button class="btn ghost" type="submit">刷新列表</button>
+      </form>
+      <div id="book-list" class="empty">加载中…</div>
+    </div>
+  </section>
+
+  <!-- ============ 报表 ============ -->
+  <section id="view-report" class="view">
+    <div class="panel">
+      <h2>房间使用率</h2>
+      <p class="hint">
+        读 <b>物化视图</b> <code class="mono">reporting.mv_room_daily_usage</code>，
+        再套 <code class="mono">rank() / sum() OVER () / ROWS BETWEEN</code> 算排名、占比、累计。
+      </p>
+      <form class="row" id="report-form" style="margin-bottom:12px">
+        <div class="field"><label>最近几天</label><input type="number" id="report-days" value="30" min="1" max="365" style="width:90px"></div>
+        <button class="btn ghost" type="submit">刷新报表</button>
+        <div class="field"><label>X-Admin-Token</label><input type="text" id="admin-token" value="dev-admin-token" style="width:180px"></div>
+        <button class="btn" type="button" id="btn-refresh-mv">刷新读模型</button>
+      </form>
+      <div class="kv" id="report-fresh" style="margin-bottom:12px"></div>
+      <div id="report-util" class="empty">加载中…</div>
+      <div class="toast" id="report-toast"></div>
+    </div>
+
+    <div class="panel">
+      <h2>按小时分布（现场聚合）</h2>
+      <p class="hint">
+        与上面刻意不同：这里每次都从明细表算，并用 <code class="mono">generate_series(0,23)</code> 造时间轴，
+        保证没有预约的小时也出现。
+      </p>
+      <div id="report-peak" class="empty">加载中…</div>
+    </div>
+  </section>
+
+  <!-- ============ 事件 / 运维 ============ -->
+  <section id="view-ops" class="view">
+    <div class="panel">
+      <h2>事件流（LISTEN / NOTIFY）</h2>
+      <p class="hint">
+        写库 → 触发器 <code class="mono">pg_notify('roomdesk_bookings', …)</code> → worker 容器的
+        <code class="mono">LISTEN</code> 收到 → 落 <code class="mono">notifications</code> 表。本页读的是最后一步。
+      </p>
+      <form class="row" id="ops-form" style="margin-bottom:12px">
+        <label class="chip on" id="ops-auto-chip"><input type="checkbox" id="ops-auto" checked> 每 5 秒自动刷新</label>
+        <button class="btn ghost" type="submit">立即刷新</button>
+      </form>
+      <div id="ops-notify" class="empty">加载中…</div>
+    </div>
+
+    <div class="panel">
+      <h2>分区（booking_events 按月）</h2>
+      <div id="ops-partitions" class="empty">加载中…</div>
+    </div>
+
+    <div class="panel">
+      <h2>数据库自检（pg_stat_statements / 关系体积）</h2>
+      <div class="kv" id="ops-identity" style="margin-bottom:12px"></div>
+      <div id="ops-statements" class="empty">加载中…</div>
+      <div id="ops-relations" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

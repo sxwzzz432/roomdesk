@@ -1,0 +1,4 @@
+# 只把运行需要的东西送进构建上下文
+*
+!pgbouncer.ini
+!entrypoint.sh

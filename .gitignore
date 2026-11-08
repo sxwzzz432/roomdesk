@@ -1,0 +1,37 @@
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+
+# ---------- 本地配置 / 密钥（只提交 .env.example） ----------
+.env
+.env.local
+.env.*.local
+*.pem
+
+# ---------- 备份产物（目录保留，内容不进仓库） ----------
+backups/*
+!backups/.gitkeep
+*.dump
+*.dump.part
+*.sql.part
+
+# ---------- 日志 ----------
+*.log
+logs/
+
+# ---------- 编辑器 / 系统 ----------
+.idea/
+.vscode/
+.vs/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 构建与临时文件 ----------
+*.tmp
+*.bak
+install-log.txt

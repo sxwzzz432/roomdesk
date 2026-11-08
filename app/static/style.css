@@ -1,0 +1,151 @@
+/* RoomDesk 前端样式：零依赖，纯 CSS（无构建步骤） */
+
+:root {
+  --bg: #f5f6fa;
+  --panel: #ffffff;
+  --line: #e3e6ef;
+  --ink: #1c2033;
+  --ink-2: #5b6178;
+  --ink-3: #8b91a7;
+  --brand: #4f46e5;
+  --brand-soft: #eef0ff;
+  --ok: #16a34a;
+  --warn: #d97706;
+  --bad: #dc2626;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(22, 27, 45, .06), 0 8px 24px rgba(22, 27, 45, .05);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 14px/1.6 -apple-system, "Segoe UI", "Microsoft YaHei", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.mono { font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace; }
+a.link { color: var(--brand); text-decoration: none; }
+a.link:hover { text-decoration: underline; }
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 12px 20px;
+  background: #12162a; color: #fff;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.brand .logo {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1, #4338ca);
+  font-size: 12px; letter-spacing: .5px;
+}
+.brand .sub { font-weight: 400; font-size: 12px; color: #9aa2c0; }
+.topright { display: flex; align-items: center; gap: 12px; font-size: 12px; color: #c7cbe0; }
+.topright a.link { color: #b9beff; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+.dot.ok { background: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, .18); }
+.dot.bad { background: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, .18); }
+
+/* ---------- 选项卡 ---------- */
+.tabs {
+  display: flex; gap: 4px; padding: 10px 20px 0;
+  background: #12162a; border-bottom: 1px solid #232a45;
+}
+.tab {
+  border: 0; background: transparent; color: #9aa2c0;
+  padding: 8px 14px; border-radius: 8px 8px 0 0; cursor: pointer;
+  font-size: 13px;
+}
+.tab:hover { color: #fff; background: rgba(255, 255, 255, .06); }
+.tab.active { background: var(--bg); color: var(--ink); font-weight: 600; }
+
+/* ---------- 布局 ---------- */
+main { padding: 20px; max-width: 1180px; margin: 0 auto; }
+.view { display: none; }
+.view.active { display: block; }
+
+.panel {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 16px; margin-bottom: 16px;
+}
+.panel h2 { margin: 0 0 4px; font-size: 15px; }
+.panel .hint { margin: 0 0 14px; color: var(--ink-3); font-size: 12px; }
+.grid { display: grid; gap: 12px; }
+.grid.c4 { grid-template-columns: repeat(4, 1fr); }
+.grid.c2 { grid-template-columns: 1fr 1fr; }
+@media (max-width: 900px) { .grid.c4, .grid.c2 { grid-template-columns: 1fr; } }
+
+/* ---------- 指标卡 ---------- */
+.stat {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow);
+}
+.stat .k { color: var(--ink-3); font-size: 12px; }
+.stat .v { font-size: 24px; font-weight: 700; margin-top: 2px; }
+.stat .m { color: var(--ink-3); font-size: 11px; margin-top: 2px; }
+
+/* ---------- 表单 ---------- */
+form.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 12px; color: var(--ink-2); }
+input, select, button { font: inherit; }
+input[type=text], input[type=number], input[type=datetime-local], select, textarea {
+  padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px;
+  background: #fff; color: var(--ink); min-width: 0;
+}
+input:focus, select:focus { outline: 2px solid var(--brand-soft); border-color: var(--brand); }
+.btn {
+  border: 1px solid var(--brand); background: var(--brand); color: #fff;
+  padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px;
+}
+.btn:hover { filter: brightness(1.05); }
+.btn.ghost { background: #fff; color: var(--brand); }
+.btn.small { padding: 4px 10px; font-size: 12px; }
+.btn.danger { background: #fff; color: var(--bad); border-color: #f3c4c4; }
+.btn.danger:hover { background: #fef2f2; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer; background: #fff;
+}
+.chip input { margin: 0; }
+.chip.on { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+
+/* ---------- 表格 ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--ink-3); font-weight: 600; font-size: 12px; white-space: nowrap; }
+tbody tr:hover { background: #fafbff; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.empty { color: var(--ink-3); padding: 16px 4px; font-size: 13px; }
+
+/* ---------- 条形 ---------- */
+.bar { background: var(--brand-soft); border-radius: 6px; height: 8px; overflow: hidden; min-width: 60px; }
+.bar > span { display: block; height: 100%; background: linear-gradient(90deg, #818cf8, #4f46e5); }
+
+/* ---------- 峰值小时柱图 ---------- */
+.chart { display: flex; align-items: flex-end; gap: 4px; height: 130px; padding-top: 8px; }
+.chart .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%; }
+.chart .col .v { font-size: 10px; color: var(--ink-3); }
+.chart .col .b { width: 100%; background: linear-gradient(180deg, #818cf8, #4f46e5); border-radius: 4px 4px 0 0; min-height: 2px; }
+.chart .col .h { font-size: 10px; color: var(--ink-3); }
+
+/* ---------- 提示 ---------- */
+.toast { padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px; display: none; }
+.toast.show { display: block; }
+.toast.ok { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.toast.err { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.toast code { background: rgba(0, 0, 0, .06); padding: 1px 5px; border-radius: 4px; }
+
+.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; }
+.badge.ok { background: #ecfdf5; color: #047857; }
+.badge.off { background: #f3f4f6; color: #6b7280; }
+
+.kv { display: flex; gap: 8px; font-size: 12px; color: var(--ink-2); flex-wrap: wrap; }
+.kv b { color: var(--ink); font-weight: 600; }
