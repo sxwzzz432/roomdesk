@@ -1,0 +1,25 @@
+# 统一缩进风格（编辑器自动遵守，减少无意义的 diff）
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{yml,yaml,json,js,css,html}]
+indent_size = 2
+
+[*.py]
+indent_size = 4
+
+[Makefile]
+indent_style = tab
+
+[*.{cmd,bat,ps1}]
+end_of_line = crlf
+
+[*.md]
+trim_trailing_whitespace = false

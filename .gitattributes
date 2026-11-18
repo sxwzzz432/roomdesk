@@ -1,0 +1,41 @@
+# ============================================================
+#  行尾规则 —— 这个项目对换行符很敏感，必须用 git 层面的规则锁住
+#
+#  · .sh 必须是 LF：脚本会被挂进 Linux 容器执行，CRLF 会报
+#    `bash: $'\r': command not found` / `/bin/sh^M: bad interpreter`
+#  · .cmd/.ps1 用 CRLF 最稳（Windows 原生）
+#  · .dump 是 pg_dump 自定义格式，二进制，交给 git 用不到行尾处理
+#
+#  这样任何人在任何系统 clone 下来，容器里那份脚本都是能直接跑的。
+# ============================================================
+
+* text=auto eol=lf
+
+# shell / SQL / YAML / 配置：一律 LF
+*.sh        text eol=lf
+*.sql       text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.ini       text eol=lf
+*.conf      text eol=lf
+*.md        text eol=lf
+*.py        text eol=lf
+*.js        text eol=lf
+*.css       text eol=lf
+*.html      text eol=lf
+.Dockerfile text eol=lf
+Dockerfile  text eol=lf
+Makefile    text eol=lf
+.env.example text eol=lf
+
+# Windows 脚本：CRLF
+*.cmd       text eol=crlf
+*.bat       text eol=crlf
+*.ps1       text eol=crlf
+
+# 二进制
+*.dump      binary
+*.zip       binary
+*.png       binary
+*.jpg       binary
+*.ico       binary

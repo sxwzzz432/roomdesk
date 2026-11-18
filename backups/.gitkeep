@@ -1,0 +1,1 @@
+备份产物目录：`make backup` 生成的 roomdesk-<时间戳>.dump 与 .schema.sql 落在这里。

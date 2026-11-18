@@ -1,0 +1,54 @@
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+
+# ---------- 本地配置 / 密钥（只提交 .env.example） ----------
+.env
+.env.local
+.env.*.local
+*.pem
+
+# ---------- 备份产物（目录保留，内容不进仓库） ----------
+backups/*
+!backups/.gitkeep
+*.dump
+*.dump.part
+*.sql.part
+
+# ---------- 日志 ----------
+*.log
+logs/
+
+# ---------- 本地文档（简历 / 实习报告 / 设计文档等，不进仓库） ----------
+docs/
+docx/
+Docx/
+DOCX/
+*.docx
+*.doc
+*.pdf
+*.pptx
+*.xlsx
+*.odt
+# 确需提交某份文档时：git add -f 路径
+
+# ---------- 工具缓存 ----------
+.ruff_cache/
+.mypy_cache/
+
+# ---------- 编辑器 / 系统 ----------
+.idea/
+.vscode/
+.vs/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 构建与临时文件 ----------
+*.tmp
+*.bak
+install-log.txt
